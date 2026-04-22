@@ -4,6 +4,7 @@ using UnityEngine;
 public class CarChassis : MonoBehaviour
 {
     [SerializeField] private WheelAxle[] wheelAxles;
+    [SerializeField] private float wheelBaseLength;
 
     //DEBUG
     public float motorTorque;
@@ -23,7 +24,7 @@ public class CarChassis : MonoBehaviour
 
             wheelAxles[i].ApplyMotorTorque(motorTorque);
             wheelAxles[i].ApplyBrakeTorque(brakeTorque);
-            wheelAxles[i].ApplySteerAngle(steerAngle);
+            wheelAxles[i].ApplySteerAngle(steerAngle, wheelBaseLength);
         }
     }
 }
