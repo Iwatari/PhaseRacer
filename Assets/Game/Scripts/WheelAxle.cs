@@ -27,6 +27,9 @@ public class WheelAxle
 
     private WheelHit leftWheelHit;
     private WheelHit rightWheelHit;
+
+    public bool IsMotor => isMotor;
+    public bool IsSteer => isSteer;
     //  Public API
     public void Update()
     {
@@ -134,6 +137,16 @@ public class WheelAxle
     {
         leftWheelCollider.brakeTorque = brakeTorque;
         rightWheelCollider.brakeTorque = brakeTorque;
+    }
+
+    public float GetAverageRpm()
+    {
+        return (leftWheelCollider.rpm + rightWheelCollider.rpm) * 0.5f;
+    }
+
+    public float GetRadius()
+    {
+        return leftWheelCollider.radius;
     }
 
     // Private

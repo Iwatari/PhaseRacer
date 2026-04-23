@@ -4,13 +4,21 @@ using UnityEngine;
 public class Car : MonoBehaviour
 {
 
-    [SerializeField] private float maxMotorTorque;
     [SerializeField] private float maxSteerAngle;
     [SerializeField] private float maxBrakeTorque;
+
+    [SerializeField] private AnimationCurve engineTorqueCurve;
+    [SerializeField] private float maxMotorTorque;
+    [SerializeField] private float maxSpeed;
+
+    public float LinearVelocity => chassis.LinearVelocity;
+    public float WheelSpeed => chassis.GetWheelSpeed();
+    public float MaxSpeed => maxSpeed;
 
     private CarChassis chassis;
 
     // Debug
+    [SerializeField] public float linearVelocity;
     public float throttleControl;
     public float steerControl;
     public float brakeControl;
@@ -23,7 +31,13 @@ public class Car : MonoBehaviour
 
     private void Update()
     {
-        chassis.motorTorque = maxMotorTorque * throttleControl;
+        linearVelocity = LinearVelocity;
+        float engineTorque = engineTorqueCurve.Evaluate(LinearVelocity / maxSpeed) * maxMotorTorque;
+
+        if (LinearVelocity >= maxSpeed)
+            engineTorque = 0;
+
+        chassis.motorTorque = engineTorque * throttleControl;
         chassis.steerAngle = maxSteerAngle * steerControl;
         chassis.brakeTorque = maxBrakeTorque * brakeControl;
     }

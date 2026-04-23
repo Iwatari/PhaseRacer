@@ -753,6 +753,37 @@ Transform:
   - {fileID: 5437278546006523721}
   m_Father: {fileID: 558379259871679987}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4097972640060195085
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1456666869195177651}
+  m_Layer: 0
+  m_Name: CenterOfMass
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1456666869195177651
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4097972640060195085}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.215, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8042034112782390707}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4128487310276758521
 GameObject:
   m_ObjectHideFlags: 0
@@ -878,6 +909,8 @@ Transform:
   - {fileID: 4359094753457669749}
   - {fileID: 3564712027930265761}
   - {fileID: 8272864714963517062}
+  - {fileID: 1456666869195177651}
+  - {fileID: 6767802861145914672}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &5028760253700051214
@@ -926,12 +959,28 @@ MonoBehaviour:
     rightWheelMesh: {fileID: 7747465036375469249}
     isMotor: 1
     isSteer: 1
+    wheelWidth: 1.56
+    antiRollForce: 70000
+    additionalWheelDownForce: 100
+    baseForwardStiffness: 1.5
+    stabilityForwardFactor: 1
+    baseSidewaysStiffness: 2
+    stabilitySidewaysFactor: 1
   - leftWheelCollider: {fileID: 6375771936435802264}
     rightWheelCollider: {fileID: 1440209967299244201}
     leftWheelMesh: {fileID: 4429860673927867329}
     rightWheelMesh: {fileID: 8508563095976224969}
     isMotor: 1
     isSteer: 0
+    wheelWidth: 1.56
+    antiRollForce: 70000
+    additionalWheelDownForce: 100
+    baseForwardStiffness: 1.5
+    stabilityForwardFactor: 1
+    baseSidewaysStiffness: 2
+    stabilitySidewaysFactor: 1
+  wheelBaseLength: 2.45
+  centerOfMass: {fileID: 1456666869195177651}
   motorTorque: 0
   brakeTorque: 0
   steerAngle: 0
@@ -1537,6 +1586,51 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &8180508136956866906
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6767802861145914672}
+  - component: {fileID: 85996659104219036}
+  m_Layer: 0
+  m_Name: Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6767802861145914672
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8180508136956866906}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -6.12232, y: -1.1431401, z: -6.68639}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8042034112782390707}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &85996659104219036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8180508136956866906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c969672c041cee45b53ddba0ae4eebe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CarInputControl
+  car: {fileID: 2554559852686346909}
 --- !u!1 &8594266627888478748
 GameObject:
   m_ObjectHideFlags: 0
