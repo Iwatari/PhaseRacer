@@ -7,8 +7,17 @@ public class Car : MonoBehaviour
     [SerializeField] private float maxSteerAngle;
     [SerializeField] private float maxBrakeTorque;
 
+    [Header("Engine")]
     [SerializeField] private AnimationCurve engineTorqueCurve;
-    [SerializeField] private float maxMotorTorque;
+    [SerializeField] private float engineMaxTorque;
+    // Debug
+    [SerializeField] private float engineTorque;
+    // Debug
+    [SerializeField] private float engineRpm;
+
+    [SerializeField] private float engineMinRpm;
+    [SerializeField] private float engineMaxRpm;
+
     [SerializeField] private float maxSpeed;
 
     public float LinearVelocity => chassis.LinearVelocity;
@@ -32,7 +41,8 @@ public class Car : MonoBehaviour
     private void Update()
     {
         linearVelocity = LinearVelocity;
-        float engineTorque = engineTorqueCurve.Evaluate(LinearVelocity / maxSpeed) * maxMotorTorque;
+
+        UpdateEngineTorque();
 
         if (LinearVelocity >= maxSpeed)
             engineTorque = 0;
@@ -40,5 +50,12 @@ public class Car : MonoBehaviour
         chassis.motorTorque = engineTorque * throttleControl;
         chassis.steerAngle = maxSteerAngle * steerControl;
         chassis.brakeTorque = maxBrakeTorque * brakeControl;
+    }
+    private void UpdateEngineTorque()
+    {
+        engineRpm = engineMinRpm + Mathf.Abs(chassis.GetAverageRpm() * 3.7f);
+        engineRpm = Mathf.Clamp(engineRpm,engineMinRpm, engineMaxRpm);
+
+        engineTorque = engineTorqueCurve.Evaluate(engineRpm / engineMaxRpm) * engineMaxTorque;
     }
 }
