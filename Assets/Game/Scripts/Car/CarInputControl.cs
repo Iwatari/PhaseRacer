@@ -22,6 +22,13 @@ public class CarInputControl : MonoBehaviour
         UpdateSteer();
 
         UpdateAutoBreak();
+
+        //Debug
+        if (Input.GetKeyDown(KeyCode.E))
+            car.UpGear();
+
+        if (Input.GetKeyDown(KeyCode.Q))
+            car.DownGear();
     }
 
     private void UpdateThrottleBreak()
@@ -29,13 +36,24 @@ public class CarInputControl : MonoBehaviour
         // проверяем двигаются ли колёса в ту же сторону куда двигается машина
         if (Mathf.Sign(verticalAxis) == Mathf.Sign(wheelSpeed) || Mathf.Abs(wheelSpeed) < 0.5f)
         {
-            car.throttleControl = verticalAxis;
+            car.throttleControl = Mathf.Abs(verticalAxis);
             car.brakeControl = 0;
         }
         else
         {
             car.throttleControl = 0;
             car.brakeControl = breakCurve.Evaluate(car.WheelSpeed / car.MaxSpeed);
+        }
+
+        //Gears
+        if (verticalAxis < 0 && wheelSpeed > -0.5f && wheelSpeed <= 0.5f)
+        {
+            car.ShiftToReverseGear();
+        }
+
+        if (verticalAxis > 0 && wheelSpeed > -0.5f && wheelSpeed < 0.5f)
+        {
+            car.ShiftToFirstGear();
         }
     }
     private void UpdateSteer()
