@@ -1,20 +1,23 @@
-using System.Runtime.CompilerServices;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-[RequireComponent (typeof(CarChassis))]
+[RequireComponent(typeof(CarChassis))]
 public class Car : MonoBehaviour
 {
+
     public event UnityAction<string> GearChanged;
+
     [SerializeField] private float maxSteerAngle;
     [SerializeField] private float maxBrakeTorque;
 
     [Header("Engine")]
     [SerializeField] private AnimationCurve engineTorqueCurve;
     [SerializeField] private float engineMaxTorque;
-    // Debug
+    // DEBUG
     [SerializeField] private float engineTorque;
-    // Debug
+    // DEBUG
     [SerializeField] private float engineRpm;
 
     [SerializeField] private float engineMinRpm;
@@ -24,16 +27,17 @@ public class Car : MonoBehaviour
     [SerializeField] private float[] gears;
     [SerializeField] private float finalDriveRatio;
 
-    //Debug
     [SerializeField] private int selectedGearIndex;
+
+    //DEBUG
     [SerializeField] private float selectedGear;
     [SerializeField] private float rearGear;
     [SerializeField] private float upShiftEngineRpm;
     [SerializeField] private float downShiftEngineRpm;
 
-    [SerializeField] private float maxSpeed;
-
+    [SerializeField] private int maxSpeed;
     public float LinearVelocity => chassis.LinearVelocity;
+    public float NormalizeLinearVelocity => chassis.LinearVelocity / maxSpeed;
     public float WheelSpeed => chassis.GetWheelSpeed();
     public float MaxSpeed => maxSpeed;
 
@@ -41,25 +45,17 @@ public class Car : MonoBehaviour
     public float EngineMaxRpm => engineMaxRpm;
 
     private CarChassis chassis;
+    public Rigidbody Rigidbody => chassis == null ? GetComponent<CarChassis>().Rigidbody : chassis.Rigidbody;
 
-    // Debug
-    [SerializeField] public float linearVelocity;
-    public float throttleControl;
-    public float steerControl;
-    public float brakeControl;
-    public float handBrakeControl;
+    // DEBUG(public)
+    [SerializeField] private float linearVelocity;
+    public float ThrottleControl;
+    public float SteerControl;
+    public float BrakeControl;
 
     private void Start()
     {
         chassis = GetComponent<CarChassis>();
-    }
-    public string GetSelectedGearName()
-    {
-        if (selectedGear == rearGear) return "R";
-
-        if (selectedGear == 0) return "N";
-
-        return (selectedGearIndex + 1).ToString();
     }
 
     private void Update()
@@ -71,26 +67,39 @@ public class Car : MonoBehaviour
         AutoGearShift();
 
         if (LinearVelocity >= maxSpeed)
+        {
             engineTorque = 0;
+        }
 
-        chassis.motorTorque = engineTorque * throttleControl;
-        chassis.steerAngle = maxSteerAngle * steerControl;
-        chassis.brakeTorque = maxBrakeTorque * brakeControl;
+        chassis.MotorTorque = engineTorque * ThrottleControl;
+        chassis.SteerAngle = maxSteerAngle * SteerControl;
+        chassis.BrakeTorque = maxBrakeTorque * BrakeControl;
     }
+
     //Gearbox
+
+    public string GetSelectedGearName()
+    {
+        if (selectedGear == rearGear) return "R";
+
+        if (selectedGear == 0) return "N";
+
+        return (selectedGearIndex + 1).ToString();
+    }
+
     private void AutoGearShift()
     {
         if (selectedGear < 0) return;
 
         if (engineRpm >= upShiftEngineRpm)
-            UpGear();
+            upGear();
 
         if (engineRpm < downShiftEngineRpm)
             DownGear();
 
         selectedGearIndex = Mathf.Clamp(selectedGearIndex, 0, gears.Length - 1);
     }
-    public void UpGear()
+    public void upGear()
     {
         ShiftGear(selectedGearIndex + 1);
     }
@@ -111,7 +120,7 @@ public class Car : MonoBehaviour
         ShiftGear(0);
     }
 
-    public void ShiftToNetral()
+    public void ShiftToNeutral()
     {
         selectedGear = 0;
         GearChanged?.Invoke(GetSelectedGearName());
@@ -122,13 +131,35 @@ public class Car : MonoBehaviour
         gearIndex = Mathf.Clamp(gearIndex, 0, gears.Length - 1);
         selectedGear = gears[gearIndex];
         selectedGearIndex = gearIndex;
+
         GearChanged?.Invoke(GetSelectedGearName());
     }
     private void UpdateEngineTorque()
     {
         engineRpm = engineMinRpm + Mathf.Abs(chassis.GetAverageRpm() * selectedGear * finalDriveRatio);
-        engineRpm = Mathf.Clamp(engineRpm,engineMinRpm, engineMaxRpm);
+        engineRpm = Mathf.Clamp(engineRpm, engineMinRpm, engineMaxRpm);
 
         engineTorque = engineTorqueCurve.Evaluate(engineRpm / engineMaxRpm) * engineMaxTorque * finalDriveRatio * Mathf.Sign(selectedGear) * gears[0];
+    }
+
+    public void Reset()
+    {
+        chassis.Reset();
+
+        chassis.MotorTorque = 0;
+        chassis.BrakeTorque = 0;
+        chassis.SteerAngle = 0;
+
+        ThrottleControl = 0;
+        BrakeControl = 0;
+        SteerControl = 0;
+    }
+
+    public void Respawn(Vector3 position, Quaternion rotation)
+    {
+        Reset();
+
+        transform.position = position;
+        transform.rotation = rotation;
     }
 }

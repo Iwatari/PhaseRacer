@@ -1,16 +1,17 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
-[RequireComponent (typeof(Rigidbody))]
+[RequireComponent(typeof(Rigidbody))]
 public class CarChassis : MonoBehaviour
 {
     [SerializeField] private WheelAxle[] wheelAxles;
     [SerializeField] private float wheelBaseLength;
 
-    [SerializeField] private Transform centerOfMass;
+    [SerializeField] private Transform centerofMass;
 
-    [Header("DownForce")]
+    [Header("Down Force")]
     [SerializeField] private float downForceMin;
     [SerializeField] private float downForceMax;
     [SerializeField] private float downForceFactor;
@@ -20,21 +21,23 @@ public class CarChassis : MonoBehaviour
     [SerializeField] private float angularDragMax;
     [SerializeField] private float angularDragFactor;
 
-    //DEBUG
-    public float motorTorque;
-    public float brakeTorque;
-    public float steerAngle;
+    // DEBUG (public)
+    public float MotorTorque;
+    public float BrakeTorque;
+    public float SteerAngle;
 
     public float LinearVelocity => rigidbody.linearVelocity.magnitude * 3.6f;
 
     private new Rigidbody rigidbody;
 
+    public Rigidbody Rigidbody => rigidbody == null ? GetComponent<Rigidbody>() : rigidbody;
+
     private void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
 
-        if (centerOfMass != null)
-            rigidbody.centerOfMass = centerOfMass.localPosition;
+        if (centerofMass != null)
+            rigidbody.centerOfMass = centerofMass.localPosition;
 
         for (int i = 0; i < wheelAxles.Length; i++)
         {
@@ -48,35 +51,18 @@ public class CarChassis : MonoBehaviour
         // прижимная сила (сопротивление воздуха)
         UpdateDownForce();
 
-        UpdateWheelAxles();
+        UpdateWheelAxle();
     }
-
-    public float GetAverageRpm()
-    {
-        float sum = 0;
-        for (int i = 0; i < wheelAxles.Length; i++)
-        {
-            sum += wheelAxles[i].GetAverageRpm();
-        }
-        return sum / wheelAxles.Length;
-    }
-    public float GetWheelSpeed()
-    {
-        return GetAverageRpm() * wheelAxles[0].GetRadius() * 2 * 0.1885f;
-    }
-
     private void UpdateAngularDrag()
     {
         rigidbody.angularDamping = Mathf.Clamp(angularDragFactor * LinearVelocity, angularDragMin, angularDragMax);
     }
-
     private void UpdateDownForce()
     {
         float downForce = Mathf.Clamp(downForceFactor * LinearVelocity, downForceMin, downForceMax);
         rigidbody.AddForce(-transform.up * downForce);
     }
-
-    private void UpdateWheelAxles()
+    private void UpdateWheelAxle()
     {
         int amountMotorWheel = 0;
 
@@ -90,9 +76,31 @@ public class CarChassis : MonoBehaviour
         {
             wheelAxles[i].Update();
 
-            wheelAxles[i].ApplyMotorTorque(motorTorque / amountMotorWheel);
-            wheelAxles[i].ApplyBrakeTorque(brakeTorque);
-            wheelAxles[i].ApplySteerAngle(steerAngle, wheelBaseLength);
+            wheelAxles[i].AplyMotorTorque(MotorTorque / amountMotorWheel);
+            wheelAxles[i].AplySteerAngle(SteerAngle, wheelBaseLength);
+            wheelAxles[i].AplyBreakTorque(BrakeTorque);
         }
+    }
+    public float GetAverageRpm()
+    {
+        float sumn = 0;
+
+        for (int i = 0; i < wheelAxles.Length; i++)
+        {
+            sumn += wheelAxles[i].GetAvarageRpm();
+        }
+
+        return sumn / wheelAxles.Length;
+    }
+
+    public float GetWheelSpeed()
+    {
+        return GetAverageRpm() * wheelAxles[0].GetRadius() * 2 * 0.1885f;
+    }
+
+    public void Reset()
+    {
+        rigidbody.linearVelocity = Vector3.zero;
+        rigidbody.angularVelocity = Vector3.zero;
     }
 }

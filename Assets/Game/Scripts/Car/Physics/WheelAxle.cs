@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -19,10 +21,10 @@ public class WheelAxle
 
     [SerializeField] private float additionalWheelDownForce;
 
-    [SerializeField] private float baseForwardStiffness = 1.5f;
+    [SerializeField] private float baseForwardStiffnes = 1.5f;
     [SerializeField] private float stabilityForwardFactor = 1.0f;
 
-    [SerializeField] private float baseSidewaysStiffness = 2.0f;
+    [SerializeField] private float baseSidewaysStiffnes = 2.0f;
     [SerializeField] private float stabilitySidewaysFactor = 1.0f;
 
     private WheelHit leftWheelHit;
@@ -30,22 +32,25 @@ public class WheelAxle
 
     public bool IsMotor => isMotor;
     public bool IsSteer => isSteer;
-    //  Public API
+
+    //public API
     public void Update()
     {
         UpdateWheelHit();
 
-        ApplyAntiRoll();
-        ApplyDownForce();
+        AplyAntiRoll();
+        AplyDownForce();
         CorrectStiffness();
 
         SyncMeshTransform();
     }
+
     public void ConfigureVehicleSubsteps(float speedThreshold, int speedBelowThreshold, int stepsAboveThreshold)
     {
         leftWheelCollider.ConfigureVehicleSubsteps(speedThreshold, speedBelowThreshold, stepsAboveThreshold);
         rightWheelCollider.ConfigureVehicleSubsteps(speedThreshold, speedBelowThreshold, stepsAboveThreshold);
     }
+
     private void UpdateWheelHit()
     {
         leftWheelCollider.GetGroundHit(out leftWheelHit);
@@ -60,11 +65,11 @@ public class WheelAxle
         WheelFrictionCurve leftSideways = leftWheelCollider.sidewaysFriction;
         WheelFrictionCurve rightSideways = rightWheelCollider.sidewaysFriction;
 
-        leftForward.stiffness = baseForwardStiffness + Mathf.Abs(leftWheelHit.forwardSlip) * stabilityForwardFactor;
-        rightForward.stiffness = baseForwardStiffness + Mathf.Abs(rightWheelHit.forwardSlip) * stabilityForwardFactor;
+        leftForward.stiffness = baseForwardStiffnes + MathF.Abs(leftWheelHit.forwardSlip) * stabilityForwardFactor;
+        rightForward.stiffness = baseForwardStiffnes + MathF.Abs(rightWheelHit.forwardSlip) * stabilityForwardFactor;
 
-        leftSideways.stiffness = baseSidewaysStiffness + Mathf.Abs(leftWheelHit.sidewaysSlip) * stabilitySidewaysFactor;
-        rightSideways.stiffness = baseSidewaysStiffness + Mathf.Abs(rightWheelHit.sidewaysSlip) * stabilitySidewaysFactor;
+        leftSideways.stiffness = baseSidewaysStiffnes + Mathf.Abs(leftWheelHit.sidewaysSlip) * stabilitySidewaysFactor;
+        rightSideways.stiffness = baseSidewaysStiffnes + Mathf.Abs(rightWheelHit.sidewaysSlip) * stabilitySidewaysFactor;
 
         leftWheelCollider.forwardFriction = leftForward;
         rightWheelCollider.forwardFriction = rightForward;
@@ -73,7 +78,7 @@ public class WheelAxle
         rightWheelCollider.sidewaysFriction = rightSideways;
     }
 
-    private void ApplyDownForce()
+    private void AplyDownForce()
     {
         if (leftWheelCollider.isGrounded == true)
             leftWheelCollider.attachedRigidbody.AddForceAtPosition(leftWheelHit.normal * -additionalWheelDownForce *
@@ -84,42 +89,42 @@ public class WheelAxle
                 rightWheelCollider.attachedRigidbody.linearVelocity.magnitude, rightWheelCollider.transform.position);
     }
 
-    private void ApplyAntiRoll()
+    private void AplyAntiRoll()
     {
-        float travelLeft = 1.0f;
-        float travelRight = 1.0f;
+        float travelL = 1.0f;
+        float travelR = 1.0f;
 
-        if(leftWheelCollider.isGrounded == true)
-            travelLeft = (-leftWheelCollider.transform.InverseTransformPoint(leftWheelHit.point).y - leftWheelCollider.radius) / leftWheelCollider.suspensionDistance;
+        if (leftWheelCollider.isGrounded == true)
+            travelL = (-leftWheelCollider.transform.InverseTransformPoint(leftWheelHit.point).y - leftWheelCollider.radius) / leftWheelCollider.suspensionDistance;
 
         if (rightWheelCollider.isGrounded == true)
-            travelRight = (-rightWheelCollider.transform.InverseTransformPoint(rightWheelHit.point).y - rightWheelCollider.radius) / rightWheelCollider.suspensionDistance;
+            travelR = (-rightWheelCollider.transform.InverseTransformPoint(rightWheelHit.point).y - rightWheelCollider.radius) / rightWheelCollider.suspensionDistance;
 
-        float forceDir = (travelLeft - travelRight);
+        float forceDir = (travelL - travelR);
 
-        if(leftWheelCollider.isGrounded == true)
+        if (leftWheelCollider.isGrounded == true)
             leftWheelCollider.attachedRigidbody.AddForceAtPosition(leftWheelCollider.transform.up * -forceDir * antiRollForce, leftWheelCollider.transform.position);
 
         if (rightWheelCollider.isGrounded == true)
             rightWheelCollider.attachedRigidbody.AddForceAtPosition(rightWheelCollider.transform.up * forceDir * antiRollForce, rightWheelCollider.transform.position);
     }
 
-    public void ApplySteerAngle(float steerAngle, float wheelBaseLenght)
+    public void AplySteerAngle(float steerAngle, float wheelBaseLength)
     {
         if (isSteer == false) return;
 
-        float radius = Mathf.Abs(wheelBaseLenght * Mathf.Tan(Mathf.Deg2Rad *(90 - Mathf.Abs(steerAngle))));
-        float angleSing = Mathf.Sign(steerAngle);
+        float radius = Mathf.Abs(wheelBaseLength * Mathf.Tan(Mathf.Deg2Rad * (90 - Mathf.Abs(steerAngle))));
+        float angleSign = Mathf.Sign(steerAngle);
 
-        if(steerAngle > 0)
+        if (steerAngle > 0)
         {
-            leftWheelCollider.steerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBaseLenght / (radius + (wheelWidth * 0.5f))) * angleSing;
-            rightWheelCollider.steerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBaseLenght / (radius - (wheelWidth * 0.5f))) * angleSing;
+            leftWheelCollider.steerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBaseLength / (radius + (wheelWidth * 0.5f))) * angleSign;
+            rightWheelCollider.steerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBaseLength / (radius - (wheelWidth * 0.5f))) * angleSign;
         }
         else if (steerAngle < 0)
         {
-            leftWheelCollider.steerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBaseLenght / (radius - (wheelWidth * 0.5f))) * angleSing;
-            rightWheelCollider.steerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBaseLenght / (radius + (wheelWidth * 0.5f))) * angleSing;
+            leftWheelCollider.steerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBaseLength / (radius - (wheelWidth * 0.5f))) * angleSign;
+            rightWheelCollider.steerAngle = Mathf.Rad2Deg * Mathf.Atan(wheelBaseLength / (radius + (wheelWidth * 0.5f))) * angleSign;
         }
         else
         {
@@ -129,7 +134,7 @@ public class WheelAxle
 
     }
 
-    public void ApplyMotorTorque(float motorTorque)
+    public void AplyMotorTorque(float motorTorque)
     {
         if (isMotor == false) return;
 
@@ -137,13 +142,13 @@ public class WheelAxle
         rightWheelCollider.motorTorque = motorTorque;
     }
 
-    public void ApplyBrakeTorque(float brakeTorque)
+    public void AplyBreakTorque(float brakeTorque)
     {
         leftWheelCollider.brakeTorque = brakeTorque;
         rightWheelCollider.brakeTorque = brakeTorque;
     }
 
-    public float GetAverageRpm()
+    public float GetAvarageRpm()
     {
         return (leftWheelCollider.rpm + rightWheelCollider.rpm) * 0.5f;
     }
@@ -153,7 +158,8 @@ public class WheelAxle
         return leftWheelCollider.radius;
     }
 
-    // Private
+
+    // private
     private void SyncMeshTransform()
     {
         UpdateWheelTransform(leftWheelCollider, leftWheelMesh);
@@ -164,6 +170,7 @@ public class WheelAxle
     {
         Vector3 position;
         Quaternion rotation;
+
         wheelCollider.GetWorldPose(out position, out rotation);
 
         wheelTransform.position = position;
